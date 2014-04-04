@@ -75,9 +75,13 @@ namespace PosEd
 		const int WORLD_WIDTH = MAP_WIDTH * TILE_WIDTH;
 		const int WORLD_HEIGHT = MAP_HEIGHT * TILE_HEIGHT;
 
-		int slowCount = 0;
 		bool slow = false;
+		int slowCount = 0;
 		int delta = 100;
+
+		bool game = false;
+		float posx = 0;
+		float posy = 0;
 
 		public Game1 ()
 		{
@@ -97,6 +101,8 @@ namespace PosEd
 		{
 			slow = false;
 			level = LevelGenerator.Generate(MAP_WIDTH, MAP_HEIGHT);
+
+			SetStartXY ();
 		}
 
 		void SlowMotion ()
@@ -108,6 +114,23 @@ namespace PosEd
 				level = new LevelDescription(MAP_WIDTH, MAP_HEIGHT, LevelGenerator.Context.LastSnapshot);
 		}
 
+		void GameMode()
+		{
+			game = true;
+			slow = false;
+		}
+
+		void SetStartXY ()
+		{
+			var startIndex = level.Tiles.FindIndex (tile => tile.Start);
+			var c = (startIndex % level.Width) + 0.5f;
+			var l = (startIndex / level.Width) + 0.5f;
+
+			posx = (c * (float)TILE_WIDTH);
+			posy = (l * (float)TILE_HEIGHT);
+
+			Console.WriteLine (String.Format("{0} {1} {2} {3}", l, c, posx, posy));
+		}			
 
 		/// <summary>
 		/// Overridden from the base Game.Initialize. Once the GraphicsDevice is setup,
@@ -160,16 +183,17 @@ namespace PosEd
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Update (GameTime gameTime)
 		{
-			UpdateKeys ();
+			UpdateKeys (gameTime);
 			UpdateSlow (gameTime);
+			UpdateGame (gameTime);
 			base.Update (gameTime);
 		}
 
-		void UpdateKeys ()
+		void UpdateKeys (GameTime gameTime)
 		{
 			Keys[] newKeyDowns = Keyboard.GetState ().GetPressedKeys ();
 			IEnumerable<Keys> keyStillDowns = newKeyDowns.Intersect (oldKeyDowns);
-			//			IEnumerable<Keys> newKeyPresses = newKeyDowns.Except (keyStillDowns);
+			IEnumerable<Keys> newKeyPresses = newKeyDowns.Except (keyStillDowns);
 			IEnumerable<Keys> newKeyReleases = oldKeyDowns.Except (keyStillDowns);
 
 			if (newKeyReleases.Contains(Keys.R)) {
@@ -178,6 +202,24 @@ namespace PosEd
 
 			if (newKeyReleases.Contains (Keys.S)) {
 				SlowMotion ();
+			}
+
+			if (newKeyReleases.Contains (Keys.G)) {
+				GameMode ();
+			}
+
+			if (keyStillDowns.Contains (Keys.Left)) {
+				posx -= ((2 * gameTime.ElapsedGameTime.Milliseconds) / 1000.0f);
+				Console.WriteLine (String.Format("{0} {1}", posx, posy));
+			}
+
+			if (keyStillDowns.Contains (Keys.Right)) {
+			}
+
+			if (keyStillDowns.Contains (Keys.Up)) {
+			}
+
+			if (keyStillDowns.Contains (Keys.Down)) {
 			}
 
 			oldKeyDowns = newKeyDowns;
@@ -201,19 +243,39 @@ namespace PosEd
 			level = new LevelDescription(MAP_WIDTH, MAP_HEIGHT, LevelGenerator.Context.Snapshots[slowCount]);
 		}
 
+		void UpdateGame(GameTime gameTime)
+		{
+
+		}
+
 		/// <summary>
 		/// This is called when the game should draw itself. 
 		/// </summary>
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Draw (GameTime gameTime)
 		{
-			Console.WriteLine ("----");
-
 			// Clear the backbuffer
 			graphics.GraphicsDevice.Clear (Color.CornflowerBlue);
 
 			spriteBatch.Begin ();
 
+			if (game)
+				RenderGame ();
+			else
+				RenderMap ();
+
+			spriteBatch.End ();
+
+			//TODO: Add your drawing code here
+			base.Draw (gameTime);
+		}
+
+		void RenderGame()
+		{
+		}
+
+		void RenderMap ()
+		{
 			for (int l = 0; l < level.Height; l++) {
 				for (int c = 0; c < level.Width; c++) {
 					var rectangle = new Rectangle (c * TILE_WIDTH, l * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
@@ -222,17 +284,13 @@ namespace PosEd
 					if (!IsEmptyRoom (l, c)) {
 						if (texture != null) {
 							spriteBatch.Draw (texture, rectangle, null, color);
-						} else {
+						}
+						else {
 							DumpTileInfo (l, c);
 						}
 					}
 				}
 			}
-
-			spriteBatch.End ();
-
-			//TODO: Add your drawing code here
-			base.Draw (gameTime);
 		}
 			
 		Texture2D SelectRoomTexture (int l, int c)
