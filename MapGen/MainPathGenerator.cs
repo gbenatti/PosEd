@@ -58,7 +58,7 @@ namespace MapGen
 			if (!IsTargetTileEmpty (context, targetPosition.Item1))
 				return false;
 
-			CreateNewSnapshotWithChange (context, targetPosition.Item1, TileTypes.LeftRight);
+			CreateNewSnapshotWithChange (context, targetPosition.Item1, TileData.Create(WallTypes.Top|WallTypes.Bottom, true));
 
 			return true;
 		}
@@ -74,7 +74,7 @@ namespace MapGen
 			if (!IsTargetTileEmpty (context, targetPosition.Item1))
 				return false;
 
-			CreateNewSnapshotWithChange (context, targetPosition.Item1, TileTypes.LeftRight);
+			CreateNewSnapshotWithChange (context, targetPosition.Item1, TileData.Create(WallTypes.Top|WallTypes.Bottom, true));
 
 			return true;
 		}
@@ -90,15 +90,21 @@ namespace MapGen
 
 			if (IsLastTileInLastRow (context)) {
 				done = true;
+
+				var myself = context.LastSnapshot [context.LastUpdatedTileIndex];
+				var newLevel = LevelGenerator.CloneUpdatingTileAtIndex (context.LastUpdatedTileIndex, TileData.Create(myself.Walls, true, false, true), context.LastSnapshot);
+				context.Snapshots.Add (newLevel);
+
 				return false;
 			}
 
-			var newLevel = LevelGenerator.CloneUpdatingTileAtIndex (context.LastUpdatedTileIndex, TileTypes.LeftRightBottom, context.LastSnapshot);
-			context.Snapshots.Add (newLevel);
+			var lastTile = context.LastSnapshot [context.LastUpdatedTileIndex];
+			var level = LevelGenerator.CloneUpdatingTileAtIndex (context.LastUpdatedTileIndex, TileData.Create(lastTile.Walls & ~WallTypes.Bottom, true, lastTile.Start), context.LastSnapshot);
+			context.Snapshots.Add (level);
 
 			var targetIndex = context.LastUpdatedTileIndex += context.Width;
 
-			CreateNewSnapshotWithChange (context, targetIndex, TileTypes.LeftRightTop);
+			CreateNewSnapshotWithChange (context, targetIndex, TileData.Create(WallTypes.Bottom, true));
 
 			return true;
 		}
@@ -114,19 +120,20 @@ namespace MapGen
 			if (!IsTargetTileEmpty (context, targetPosition.Item1))
 				return false;
 
-			var newLevel = LevelGenerator.CloneUpdatingTileAtIndex (context.LastUpdatedTileIndex, TileTypes.LeftRightTop, context.LastSnapshot);
+			var lastTile = context.LastSnapshot [context.LastUpdatedTileIndex];
+			var newLevel = LevelGenerator.CloneUpdatingTileAtIndex (context.LastUpdatedTileIndex, TileData.Create(lastTile.Walls & ~WallTypes.Top, true), context.LastSnapshot);
 			context.Snapshots.Add (newLevel);
 
 			var targetIndex = context.LastUpdatedTileIndex -= context.Width;
 
-			CreateNewSnapshotWithChange (context, targetIndex, TileTypes.LeftRightBottom);
+			CreateNewSnapshotWithChange (context, targetIndex, TileData.Create(WallTypes.Top, true));
 
 			return true;
 		}
 
-		static void CreateNewSnapshotWithChange (MapGenerationContext context, int newIndex, TileTypes newTileType)
+		static void CreateNewSnapshotWithChange (MapGenerationContext context, int newIndex, TileData newTileData)
 		{
-			var newLevel = LevelGenerator.CloneUpdatingTileAtIndex (newIndex, newTileType, context.LastSnapshot);
+			var newLevel = LevelGenerator.CloneUpdatingTileAtIndex (newIndex, newTileData, context.LastSnapshot);
 			context.Snapshots.Add (newLevel);
 			context.LastUpdatedTileIndex = newIndex;
 		}
@@ -134,7 +141,7 @@ namespace MapGen
 		static bool IsTargetTileEmpty (MapGenerationContext context, int tileIndex)
 		{
 			var targetTile = context.LastSnapshot [tileIndex];
-			return targetTile == TileTypes.Empty;
+			return targetTile.Empty;
 		}
 
 		static bool ValidDirection (Directions newDir, MapGenerationContext context)

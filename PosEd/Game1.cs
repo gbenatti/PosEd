@@ -37,9 +37,24 @@ namespace PosEd
 
 		GraphicsDeviceManager graphics;
 		SpriteBatch spriteBatch;
-		Texture2D leftRightRoom;
-		Texture2D leftRightBottomRoom;
-		Texture2D leftRightTopRoom;
+		Texture2D wallsTB;
+		Texture2D wallsRL;
+		Texture2D wallsT;
+		Texture2D wallsB;
+		Texture2D wallsR;
+		Texture2D wallsL;
+		Texture2D noWalls;
+		Texture2D wallsBL;
+		Texture2D wallsTL;
+		Texture2D wallsBR;
+		Texture2D wallsTR;
+		Texture2D wallsLTB;
+		Texture2D wallsRTB;
+		Texture2D wallsLTRB;
+
+		Texture2D wallsLBR;
+
+		Texture2D wallsLTR;
 
 		Keys[] oldKeyDowns;
 
@@ -54,15 +69,15 @@ namespace PosEd
 		const int TILE_WIDTH = (int)(80.0f * ROOM_SCALE);
 		const int TILE_HEIGHT = (int)(45.0f * ROOM_SCALE);
 
-		const int MAP_WIDTH	= 5;
-		const int MAP_HEIGHT = 5;
+		const int MAP_WIDTH	= 6;
+		const int MAP_HEIGHT = 6;
 
 		const int WORLD_WIDTH = MAP_WIDTH * TILE_WIDTH;
 		const int WORLD_HEIGHT = MAP_HEIGHT * TILE_HEIGHT;
 
 		int slowCount = 0;
 		bool slow = false;
-		int delta = 500;
+		int delta = 100;
 
 		public Game1 ()
 		{
@@ -112,9 +127,26 @@ namespace PosEd
 			// Create a new SpriteBatch, which can be use to draw textures.
 			spriteBatch = new SpriteBatch (graphics.GraphicsDevice);
 
-			leftRightRoom = Content.Load<Texture2D> ("square-tb");
-			leftRightBottomRoom = Content.Load<Texture2D> ("square-t");
-			leftRightTopRoom = Content.Load<Texture2D> ("square-b");
+			wallsTB = Content.Load<Texture2D> ("square-tb");
+			wallsRL = Content.Load<Texture2D> ("square-rl");
+			wallsT = Content.Load<Texture2D> ("square-t");
+			wallsB = Content.Load<Texture2D> ("square-b");
+			wallsR = Content.Load<Texture2D> ("square-r");
+			wallsL = Content.Load<Texture2D> ("square-l");
+
+			noWalls = Content.Load<Texture2D> ("square");
+
+			wallsBL = Content.Load<Texture2D> ("square-bl");
+			wallsTL = Content.Load<Texture2D> ("square-lt");
+			wallsBR = Content.Load<Texture2D> ("square-rb");
+			wallsTR = Content.Load<Texture2D> ("square-tr");
+
+			wallsLTB = Content.Load<Texture2D> ("square-ltb");
+			wallsRTB = Content.Load<Texture2D> ("square-rtb");
+			wallsLTRB = Content.Load<Texture2D> ("square-ltrb");
+
+			wallsLBR = Content.Load<Texture2D> ("square-lbr");
+			wallsLTR = Content.Load<Texture2D> ("square-ltr");
 		}
 
 		#endregion
@@ -175,6 +207,8 @@ namespace PosEd
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Draw (GameTime gameTime)
 		{
+			Console.WriteLine ("----");
+
 			// Clear the backbuffer
 			graphics.GraphicsDevice.Clear (Color.CornflowerBlue);
 
@@ -185,8 +219,13 @@ namespace PosEd
 					var rectangle = new Rectangle (c * TILE_WIDTH, l * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
 					var texture = SelectRoomTexture (l, c);
 					var color = SelectRoomColor (l, c);
-					if (texture != null)
-						spriteBatch.Draw (texture, rectangle, null, color);
+					if (!IsEmptyRoom (l, c)) {
+						if (texture != null) {
+							spriteBatch.Draw (texture, rectangle, null, color);
+						} else {
+							DumpTileInfo (l, c);
+						}
+					}
 				}
 			}
 
@@ -201,27 +240,99 @@ namespace PosEd
 			Texture2D texture = null;
 			var targetTileType = level.Tiles [c + l * MAP_WIDTH];
 
-			if (targetTileType == TileTypes.LeftRight || targetTileType == TileTypes.LeftRightLost) {
-				texture = leftRightRoom;
+			if ((targetTileType.Walls ^ (WallTypes.Top|WallTypes.Bottom)) == 0) {
+				texture = wallsTB;
 			}
-			if (targetTileType == TileTypes.LeftRightBottom || targetTileType == TileTypes.LeftRightBottomLost) {
-				texture = leftRightBottomRoom;
+			if ((targetTileType.Walls ^ (WallTypes.Right|WallTypes.Left)) == 0) {
+				texture = wallsRL;
 			}
-			if (targetTileType == TileTypes.LeftRightTop || targetTileType == TileTypes.LeftRightTopLost) {
-				texture = leftRightTopRoom;
+
+			if ((targetTileType.Walls ^ (WallTypes.Top)) == 0) {
+				texture = wallsT;
 			}
+			if ((targetTileType.Walls ^ (WallTypes.Bottom)) == 0) {
+				texture = wallsB;
+			}
+			if ((targetTileType.Walls ^ (WallTypes.Right)) == 0) {
+				texture = wallsR;
+			}
+			if ((targetTileType.Walls ^ (WallTypes.Left)) == 0) {
+				texture = wallsL;
+			}
+
+			if ((targetTileType.Walls ^ (WallTypes.None)) == 0) {
+				texture = noWalls;
+			}
+
+			if ((targetTileType.Walls ^ (WallTypes.Left|WallTypes.Bottom)) == 0) {
+				texture = wallsBL;
+			}
+
+			if ((targetTileType.Walls ^ (WallTypes.Top|WallTypes.Left)) == 0) {
+				texture = wallsTL;
+			}
+
+			if ((targetTileType.Walls ^ (WallTypes.Right|WallTypes.Bottom)) == 0) {
+				texture = wallsBR;
+			}
+
+			if ((targetTileType.Walls ^ (WallTypes.Top|WallTypes.Right)) == 0) {
+				texture = wallsTR;
+			}
+
+			//
+
+			if ((targetTileType.Walls ^ (WallTypes.Left|WallTypes.Top|WallTypes.Bottom)) == 0) {
+				texture = wallsLTB;
+			}
+
+			if ((targetTileType.Walls ^ (WallTypes.Right|WallTypes.Top|WallTypes.Bottom)) == 0) {
+				texture = wallsRTB;
+			}
+
+			if ((targetTileType.Walls ^ (WallTypes.Left|WallTypes.Right|WallTypes.Top|WallTypes.Bottom)) == 0) {
+				texture = wallsLTRB;
+			}
+
+			//
+
+			if ((targetTileType.Walls ^ (WallTypes.Right|WallTypes.Left|WallTypes.Bottom)) == 0) {
+				texture = wallsLBR;
+			}
+
+			if ((targetTileType.Walls ^ (WallTypes.Left|WallTypes.Right|WallTypes.Top|WallTypes.Left)) == 0) {
+				texture = wallsLTR;
+			}
+
+
 			return texture;
 		}
 
 		Color SelectRoomColor (int l, int c)
 		{
 			var targetTileType = level.Tiles [c + l * MAP_WIDTH];
-			var index = (int)targetTileType;
-			var colors = new List<Color> {Color.Black, Color.LightGreen, Color.LightGreen, Color.LightGreen, Color.Gold, Color.Gold, Color.Gold };
 
-			return colors[index];
+			if (!targetTileType.MainPath)
+				return Color.LightYellow;
+			else if (targetTileType.Start)
+				return Color.LightGreen;
+			else if (targetTileType.Finish)
+				return Color.LightSalmon;
+			else
+				return Color.LightCyan;
 		}
 
+		bool IsEmptyRoom (int l, int c)
+		{
+			var targetTileType = level.Tiles [c + l * MAP_WIDTH];
+			return targetTileType.Empty;
+		}
+
+		void DumpTileInfo (int l, int c)
+		{
+			var targetTileType = level.Tiles [c + l * MAP_WIDTH];
+			Console.WriteLine (targetTileType.Walls);
+		}
 		#endregion
 	}
 }

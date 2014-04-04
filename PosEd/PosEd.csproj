@@ -77,8 +77,6 @@
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Content\logo.png" />
-    <BundleResource Include="Content\left-right.png" />
-    <BundleResource Include="Content\empty.png" />
     <BundleResource Include="Content\square-b.png" />
     <BundleResource Include="Content\square-bl.png" />
     <BundleResource Include="Content\square-lt.png" />
@@ -87,6 +85,14 @@
     <BundleResource Include="Content\square-t.png" />
     <BundleResource Include="Content\square-tb.png" />
     <BundleResource Include="Content\square-tr.png" />
+    <BundleResource Include="Content\square.png" />
+    <BundleResource Include="Content\square-r.png" />
+    <BundleResource Include="Content\square-l.png" />
+    <BundleResource Include="Content\square-ltrb.png" />
+    <BundleResource Include="Content\square-rtb.png" />
+    <BundleResource Include="Content\square-ltb.png" />
+    <BundleResource Include="Content\square-lbr.png" />
+    <BundleResource Include="Content\square-ltr.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

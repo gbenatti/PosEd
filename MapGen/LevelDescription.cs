@@ -15,12 +15,12 @@ namespace MapGen
 			private set;
 		}
 
-		public List<TileTypes> Tiles {
+		public List<TileData> Tiles {
 			get;
 			private set;
 		}
 
-		public LevelDescription (int width, int height, List<TileTypes> tiles)
+		public LevelDescription (int width, int height, List<TileData> tiles)
 		{
 			this.Width = width;
 			this.Height = height;

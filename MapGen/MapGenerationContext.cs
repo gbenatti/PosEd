@@ -16,7 +16,7 @@ namespace MapGen
 			set;
 		}
 
-		public List<List<TileTypes>> Snapshots {
+		public List<List<TileData>> Snapshots {
 			get;
 			set;
 		}
@@ -26,7 +26,7 @@ namespace MapGen
 			set;
 		}
 
-		public List<TileTypes> LastSnapshot {
+		public List<TileData> LastSnapshot {
 			get {
 				return Snapshots.LastOrDefault ();
 			}
@@ -39,7 +39,7 @@ namespace MapGen
 
 		public MapGenerationContext ()
 		{
-			this.Snapshots = new List<List<TileTypes>>();
+			this.Snapshots = new List<List<TileData>>();
 			this.Randomizer = new Randomizer();
 		}
 	}
