@@ -93,6 +93,7 @@
     <BundleResource Include="Content\square-ltb.png" />
     <BundleResource Include="Content\square-lbr.png" />
     <BundleResource Include="Content\square-ltr.png" />
+    <BundleResource Include="Content\bathysphere-small.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

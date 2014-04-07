@@ -56,6 +56,8 @@ namespace PosEd
 
 		Texture2D wallsLTR;
 
+		Texture2D bathyspehere;
+
 		Keys[] oldKeyDowns;
 
 		#endregion
@@ -170,6 +172,8 @@ namespace PosEd
 
 			wallsLBR = Content.Load<Texture2D> ("square-lbr");
 			wallsLTR = Content.Load<Texture2D> ("square-ltr");
+
+			bathyspehere = Content.Load<Texture2D> ("bathysphere-small");
 		}
 
 		#endregion
@@ -209,7 +213,7 @@ namespace PosEd
 			}
 
 			if (keyStillDowns.Contains (Keys.Left)) {
-				posx -= ((2 * gameTime.ElapsedGameTime.Milliseconds) / 1000.0f);
+				posx -= ((20 * gameTime.ElapsedGameTime.Milliseconds) / 1000.0f);
 				Console.WriteLine (String.Format("{0} {1}", posx, posy));
 			}
 
@@ -291,6 +295,8 @@ namespace PosEd
 					}
 				}
 			}
+
+			spriteBatch.Draw( bathyspehere, new Rectangle((int)posx-5, (int)posy-5, 10, 10), null, Color.White);
 		}
 			
 		Texture2D SelectRoomTexture (int l, int c)
