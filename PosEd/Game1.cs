@@ -74,16 +74,21 @@ namespace PosEd
 			graphics.IsFullScreen = false;
 			graphics.PreferredBackBufferWidth = SCREEN_WIDTH;
 			graphics.PreferredBackBufferHeight = SCREEN_HEIGHT;
-
-			LoadEntities ();
 		}
 
 		void LoadEntities ()
 		{
-			levelDescription = LevelGenerator.Generate(MAP_WIDTH, MAP_HEIGHT);
-			levelEntity = new LevelEntity(levelDescription, MAP_WIDTH, MAP_HEIGHT);
-			bathysphereEntity = new BathysphereEntity ();
-			camera = new Camera (SCREEN_WIDTH, SCREEN_HEIGHT, levelEntity.Width, levelEntity.Height);
+			lock (this) {
+				levelDescription = LevelGenerator.Generate(MAP_WIDTH, MAP_HEIGHT);
+				levelEntity = new LevelEntity(levelDescription, MAP_WIDTH, MAP_HEIGHT);
+				levelEntity.Load(Content);
+
+				bathysphereEntity = new BathysphereEntity ();
+				bathysphereEntity.Load (Content);
+				SetStartXY ();
+
+				camera = new Camera (SCREEN_WIDTH, SCREEN_HEIGHT, levelEntity.Width, levelEntity.Height);
+			}
 		}
 
 		void SlowMotion ()
@@ -97,8 +102,13 @@ namespace PosEd
 
 		void GameMode()
 		{
-			game = true;
+			game = !game;
 			slow = false;
+
+			if (game)
+				camera.SetViewPort (levelEntity.Width/MAP_WIDTH, levelEntity.Height/MAP_HEIGHT);
+			else
+				camera.SetViewPort (levelEntity.Width, levelEntity.Height);
 		}
 
 		void SetStartXY ()
@@ -126,7 +136,6 @@ namespace PosEd
 		void SetupInitialValues ()
 		{
 			oldKeyDowns = Keyboard.GetState().GetPressedKeys();
-			SetStartXY ();
 			slow = false;
 		}
 
@@ -137,8 +146,7 @@ namespace PosEd
 		{
 			// Create a new SpriteBatch, which can be use to draw textures.
 			spriteBatch = new SpriteBatch (graphics.GraphicsDevice);
-			levelEntity.Load(Content);
-			bathysphereEntity.Load (Content);
+			LoadEntities ();
 		}
 			
 		#endregion
@@ -152,10 +160,12 @@ namespace PosEd
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Update (GameTime gameTime)
 		{
-			UpdateKeys (gameTime);
-			UpdateSlow (gameTime);
-			UpdateGame (gameTime);
-			base.Update (gameTime);
+			lock (this) {
+				UpdateKeys (gameTime);
+				UpdateSlow (gameTime);
+				UpdateGame (gameTime);
+				base.Update (gameTime);
+			}
 		}
 
 		void UpdateKeys (GameTime gameTime)
@@ -223,16 +233,18 @@ namespace PosEd
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Draw (GameTime gameTime)
 		{
-			// Clear the backbuffer
-			graphics.GraphicsDevice.Clear (Color.CornflowerBlue);
-
-			spriteBatch.Begin ();
-
-			RenderMap ();
-
-			spriteBatch.End ();
-
-			base.Draw (gameTime);
+			lock (this) {
+				// Clear the backbuffer
+				graphics.GraphicsDevice.Clear (Color.CornflowerBlue);
+				
+				spriteBatch.Begin ();
+				
+				RenderMap ();
+				
+				spriteBatch.End ();
+				
+				base.Draw (gameTime);
+			}
 		}
 
 		void RenderMap ()

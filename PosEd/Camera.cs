@@ -39,10 +39,26 @@ namespace PosEd
 			private set;
 		}
 
+		int screenWidth;
+		int screenHeight;
+
 		public Camera (int screenWidth, int screenHeight, int viewWidth, int viewHeight)
 		{
-			ScaleX = screenWidth / viewWidth;
-			ScaleY = screenHeight / viewHeight;
+			this.screenHeight = screenHeight;
+			this.screenWidth = screenWidth;
+
+			CalculateScale (viewWidth, viewHeight);
+		}
+
+		void CalculateScale (int viewWidth, int viewHeight)
+		{
+			ScaleX = this.screenWidth / viewWidth;
+			ScaleY = this.screenHeight / viewHeight;
+		}
+
+		public void SetViewPort (int newViewWidth, int newViewHeight)
+		{
+			CalculateScale (newViewWidth, newViewHeight);
 		}
 	}
 	
