@@ -101,13 +101,13 @@ namespace PosEd
 			wallsLTR = content.Load<Texture2D> ("square-ltr");
 		}
 
-		public void Render(Camera camera, SpriteBatch spriteBatch)
+		public void Render(Camera camera, SpriteBatch spriteBatch, bool gameMode)
 		{
 			for (int l = 0; l < level.Height; l++) {
 				for (int c = 0; c < level.Width; c++) {
-					var rectangle = CreateTileRecatangle (l, c, camera);
+					var rectangle = CreateTileRectangle (l, c, camera);
 					var texture = SelectRoomTexture (l, c);
-					var color = SelectRoomColor (l, c);
+					var color = SelectRoomColor (l, c, gameMode);
 					if (!IsEmptyRoom (l, c)) {
 						if (texture != null) {
 							spriteBatch.Draw (texture, rectangle, null, color);
@@ -120,7 +120,7 @@ namespace PosEd
 			}
 		}
 
-		static Rectangle CreateTileRecatangle (int l, int c, Camera camera)
+		static Rectangle CreateTileRectangle (int l, int c, Camera camera)
 		{
 			var newPos = camera.TransformPoint (c * TILE_WIDTH, l * TILE_HEIGHT);
 			return new Rectangle (newPos.Item1, newPos.Item2, (int)(TILE_WIDTH*camera.ScaleX), (int)(TILE_HEIGHT*camera.ScaleY));
@@ -198,11 +198,11 @@ namespace PosEd
 			return texture;
 		}
 
-		Color SelectRoomColor (int l, int c)
+		Color SelectRoomColor (int l, int c, bool gameMode)
 		{
 			var targetTileType = level.Tiles [c + l * mapWidth];
 
-			if (!targetTileType.MainPath)
+			if (!targetTileType.MainPath || (gameMode && !targetTileType.Finish))
 				return Color.LightYellow;
 			else if (targetTileType.Start)
 				return Color.LightGreen;
@@ -216,6 +216,29 @@ namespace PosEd
 		{
 			var targetTileType = level.Tiles [c + l * mapWidth];
 			return targetTileType.Empty;
+		}
+
+		public bool Collision (float px, float py)
+		{
+			int c = (int)px / TILE_WIDTH;
+			int l = (int)py / TILE_HEIGHT;
+
+			var targetTileType = level.Tiles [c + l * mapWidth];
+
+			return CollisionWithWalls (targetTileType.Walls, (int)px % TILE_WIDTH, (int)py % TILE_HEIGHT);
+		}
+
+		bool CollisionWithWalls (WallTypes walls, int x, int y)
+		{
+			Console.WriteLine (String.Format("{0} - {1},{2}", walls, x, y));
+
+			if (x == 0 && ((walls & WallTypes.Left) != 0)) return true;
+			if (x == TILE_WIDTH - 1 && ((walls & WallTypes.Right) != 0)) return true;
+
+			if (y == 0 && ((walls & WallTypes.Top) != 0)) return true;
+			if (y == TILE_HEIGHT - 1 && ((walls & WallTypes.Bottom) != 0)) return true;
+
+			return false;
 		}
 
 		void DumpTileInfo (int l, int c)

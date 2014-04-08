@@ -33,6 +33,14 @@ namespace PosEd
 		float posx = 0;
 		float posy = 0;
 
+		float oldPosx = 0;
+		float oldPosy = 0;
+
+		float velx = 0;
+		float vely = 0;
+
+		float direction = 0.0f;
+
 		public float Posx {
 			get {
 				return posx;
@@ -57,10 +65,10 @@ namespace PosEd
 
 		Rectangle CreateEntityRectangle (Camera camera)
 		{
-			int width = 10;
-			int height = 10;
-			int halfWidth = width/2;
-			int halfHeight = height/2;
+			float width = 5;
+			float height = 5;
+			float halfWidth = width/2;
+			float halfHeight = height/2;
 
 			var newPos = camera.TransformPoint ((int)(posx - halfWidth), (int)(posy - halfHeight));
 			return new Rectangle (newPos.Item1, newPos.Item2, (int)(width*camera.ScaleX), (int)(height*camera.ScaleY));
@@ -68,6 +76,42 @@ namespace PosEd
 
 		public void Update (GameTime gameTime)
 		{
+			oldPosx = posx;
+			oldPosy = posy;
+
+			float fractionOfSeconds = gameTime.ElapsedGameTime.Milliseconds/1000.0f;
+
+			if (velx != 0.0f) {
+				posx += velx * fractionOfSeconds;
+
+				velx = velx > 0.0f ? velx - 4.0f * fractionOfSeconds : velx + 4.0f * fractionOfSeconds;
+
+				if (velx > -0.01f && velx < 0.01f)
+					velx = 0.0f;
+
+				if (velx > 16.0f)
+					velx = 16.0f;
+
+				if (velx < -16.0f)
+					velx = -16.0f;
+			}
+				
+			if (vely != 0.0f) {
+				posy += vely * fractionOfSeconds;
+
+				vely = vely > 0.0f ? vely - 8.0f * fractionOfSeconds : vely + 8.0f * fractionOfSeconds;
+
+				if (vely > -0.01f && vely < 0.01f)
+					vely = 0.0f;
+
+				if (vely > 8.0f)
+					vely = 8.0f;
+
+				if (vely < -8.0f)
+					vely = -8.0f;
+			}
+
+			Console.WriteLine (velx);
 		}
 
 		public void SetPosition (float posx, float posy)
@@ -78,6 +122,16 @@ namespace PosEd
 
 		public void ApplyForce (int xForce, int yForce)
 		{
+			velx += xForce;
+			vely += yForce;
+		}
+
+		public void Rewind ()
+		{
+			posx = oldPosx;
+			posy = oldPosy;
+			velx = 0.0f;
+			vely = 0.0f;
 		}
 	}
 	

@@ -128,10 +128,10 @@ namespace PosEd
 		{
 			var viewport = camera.GetViewPort ();
 			var halfViewportWidth = viewport.Item1 / 2;
-			camera.TargetX = ((bathysphereEntity.Posx - halfViewportWidth) >= 0) ? ((bathysphereEntity.Posx + halfViewportWidth > levelEntity.Width) ? halfViewportWidth : bathysphereEntity.Posx) : halfViewportWidth; 
+			camera.TargetX = ((bathysphereEntity.Posx - halfViewportWidth) >= 0) ? ((bathysphereEntity.Posx + halfViewportWidth > levelEntity.Width) ? levelEntity.Width - halfViewportWidth : bathysphereEntity.Posx) : halfViewportWidth; 
 
 			var halfViewportHeight = viewport.Item2 / 2;
-			camera.TargetY = ((bathysphereEntity.Posy - halfViewportHeight) >= 0) ? ((bathysphereEntity.Posy + halfViewportHeight > levelEntity.Height) ? halfViewportHeight : bathysphereEntity.Posy) : halfViewportHeight;
+			camera.TargetY = ((bathysphereEntity.Posy - halfViewportHeight) >= 0) ? ((bathysphereEntity.Posy + halfViewportHeight > levelEntity.Height) ? levelEntity.Height - halfViewportHeight : bathysphereEntity.Posy) : halfViewportHeight;
 		}
 
 		/// <summary>
@@ -209,9 +209,11 @@ namespace PosEd
 			}
 
 			if (keyStillDowns.Contains (Keys.Up)) {
+				bathysphereEntity.ApplyForce (0, -1);
 			}
 
 			if (keyStillDowns.Contains (Keys.Down)) {
+				bathysphereEntity.ApplyForce (0, 1);
 			}
 
 			oldKeyDowns = newKeyDowns;
@@ -238,6 +240,7 @@ namespace PosEd
 		void UpdateGame(GameTime gameTime)
 		{
 			bathysphereEntity.Update (gameTime);
+			CollisionBathysphereWorld (bathysphereEntity, levelEntity);
 			CameraFollowBathysphere ();
 		}
 
@@ -263,10 +266,19 @@ namespace PosEd
 
 		void RenderMap ()
 		{
-			levelEntity.Render (camera, spriteBatch);
+			levelEntity.Render (camera, spriteBatch, game);
 			bathysphereEntity.Render (camera, spriteBatch);
 		}
 			
+		void CollisionBathysphereWorld (BathysphereEntity bathysphereEntity, LevelEntity levelEntity)
+		{
+			float px = bathysphereEntity.Posx;
+			float py = bathysphereEntity.Posy;
+
+			if (levelEntity.Collision (px, py)) {
+				bathysphereEntity.Rewind ();
+			}
+		}
 		#endregion
 	}
 }
