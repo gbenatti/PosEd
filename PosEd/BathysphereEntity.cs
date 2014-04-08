@@ -33,6 +33,18 @@ namespace PosEd
 		float posx = 0;
 		float posy = 0;
 
+		public float Posx {
+			get {
+				return posx;
+			}
+		}
+
+		public float Posy {
+			get {
+				return posy;
+			}
+		}
+
 		public void Load(ContentManager content)
 		{
 			bathyspehere = content.Load<Texture2D> ("bathysphere-small");
@@ -50,7 +62,8 @@ namespace PosEd
 			int halfWidth = width/2;
 			int halfHeight = height/2;
 
-			return new Rectangle ((int)((posx - halfWidth)*camera.ScaleX), (int)((posy - halfHeight)*camera.ScaleY), (int)(width*camera.ScaleX), (int)(height*camera.ScaleY));
+			var newPos = camera.TransformPoint ((int)(posx - halfWidth), (int)(posy - halfHeight));
+			return new Rectangle (newPos.Item1, newPos.Item2, (int)(width*camera.ScaleX), (int)(height*camera.ScaleY));
 		}
 
 		public void Update (GameTime gameTime)

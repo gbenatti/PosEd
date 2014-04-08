@@ -88,6 +88,7 @@ namespace PosEd
 				SetStartXY ();
 
 				camera = new Camera (SCREEN_WIDTH, SCREEN_HEIGHT, levelEntity.Width, levelEntity.Height);
+				CameraFollowBathysphere ();
 			}
 		}
 
@@ -121,7 +122,17 @@ namespace PosEd
 			float startY = (l * (float)LevelEntity.TILE_HEIGHT);
 
 			bathysphereEntity.SetPosition (startX, startY);
-		}			
+		}	
+
+		void CameraFollowBathysphere ()
+		{
+			var viewport = camera.GetViewPort ();
+			var halfViewportWidth = viewport.Item1 / 2;
+			camera.TargetX = ((bathysphereEntity.Posx - halfViewportWidth) >= 0) ? ((bathysphereEntity.Posx + halfViewportWidth > levelEntity.Width) ? halfViewportWidth : bathysphereEntity.Posx) : halfViewportWidth; 
+
+			var halfViewportHeight = viewport.Item2 / 2;
+			camera.TargetY = ((bathysphereEntity.Posy - halfViewportHeight) >= 0) ? ((bathysphereEntity.Posy + halfViewportHeight > levelEntity.Height) ? halfViewportHeight : bathysphereEntity.Posy) : halfViewportHeight;
+		}
 
 		/// <summary>
 		/// Overridden from the base Game.Initialize. Once the GraphicsDevice is setup,
@@ -136,6 +147,7 @@ namespace PosEd
 		void SetupInitialValues ()
 		{
 			oldKeyDowns = Keyboard.GetState().GetPressedKeys();
+			game = false;
 			slow = false;
 		}
 
@@ -177,6 +189,7 @@ namespace PosEd
 
 			if (newKeyReleases.Contains(Keys.R)) {
 				LoadEntities ();
+				SetupInitialValues ();
 			}
 
 			if (newKeyReleases.Contains (Keys.S)) {
@@ -225,6 +238,7 @@ namespace PosEd
 		void UpdateGame(GameTime gameTime)
 		{
 			bathysphereEntity.Update (gameTime);
+			CameraFollowBathysphere ();
 		}
 
 		/// <summary>

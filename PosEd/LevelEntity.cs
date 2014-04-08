@@ -122,7 +122,8 @@ namespace PosEd
 
 		static Rectangle CreateTileRecatangle (int l, int c, Camera camera)
 		{
-			return new Rectangle ((int)(c * TILE_WIDTH* camera.ScaleX), (int)(l * TILE_HEIGHT* camera.ScaleY), (int)(TILE_WIDTH*camera.ScaleX), (int)(TILE_HEIGHT*camera.ScaleY));
+			var newPos = camera.TransformPoint (c * TILE_WIDTH, l * TILE_HEIGHT);
+			return new Rectangle (newPos.Item1, newPos.Item2, (int)(TILE_WIDTH*camera.ScaleX), (int)(TILE_HEIGHT*camera.ScaleY));
 		}
 
 		Texture2D SelectRoomTexture (int l, int c)
