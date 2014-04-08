@@ -24,18 +24,17 @@ namespace MapGen
 			set;
 		}
 
-		public bool LR {
-			get {
-				return Walls == (WallTypes.Left | WallTypes.Right);
-			}
-		}
-
 		public bool Start {
 			get;
 			set;
 		}
 
 		public bool Finish {
+			get;
+			set;
+		}
+
+		public byte[,] Blocks {
 			get;
 			set;
 		}
@@ -48,6 +47,7 @@ namespace MapGen
 			Empty = true;
 			Start = false;
 			Finish = false;
+			Blocks = new byte[16, 9];
 		}
 
 		public static TileData Create (WallTypes walls, bool mainPath, bool start = false, bool finish = false)
@@ -57,7 +57,8 @@ namespace MapGen
 				MainPath = mainPath,
 				Empty = false,
 				Start = start,
-				Finish = finish
+				Finish = finish,
+				Blocks = new byte[16, 9]
 			};
 		}
 	}
