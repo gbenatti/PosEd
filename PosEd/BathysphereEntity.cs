@@ -30,6 +30,8 @@ namespace PosEd
 	class BathysphereEntity
 	{
 		Texture2D bathyspehere;
+		Texture2D submarine;
+
 		float posx = 0;
 		float posy = 0;
 
@@ -56,11 +58,12 @@ namespace PosEd
 		public void Load(ContentManager content)
 		{
 			bathyspehere = content.Load<Texture2D> ("bathysphere-small");
+			submarine = content.Load<Texture2D> ("player");
 		}
 
-		public void Render (Camera camera, SpriteBatch spriteBatch)
+		public void Render (Camera camera, SpriteBatch spriteBatch, bool blockMode)
 		{
-			spriteBatch.Draw (bathyspehere, CreateEntityRectangle (camera), null, Color.White);
+			spriteBatch.Draw (blockMode ? submarine : bathyspehere, CreateEntityRectangle (camera), null, Color.White);
 		}
 
 		Rectangle CreateEntityRectangle (Camera camera)

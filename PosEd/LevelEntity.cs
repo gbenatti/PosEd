@@ -51,6 +51,9 @@ namespace PosEd
 
 		Texture2D wallsLTR;
 
+		Texture2D tileGround;
+		Texture2D tileSea;
+
 		int mapWidth;
 
 		int mapHeight;
@@ -99,23 +102,56 @@ namespace PosEd
 
 			wallsLBR = content.Load<Texture2D> ("square-lbr");
 			wallsLTR = content.Load<Texture2D> ("square-ltr");
+
+			tileGround = content.Load<Texture2D> ("tile-ground");
+			tileSea = content.Load<Texture2D> ("tile-sea");
 		}
 
-		public void Render(Camera camera, SpriteBatch spriteBatch, bool gameMode)
+		public void Render(Camera camera, SpriteBatch spriteBatch, bool gameMode, bool blockMode)
 		{
 			for (int l = 0; l < level.Height; l++) {
 				for (int c = 0; c < level.Width; c++) {
-					var rectangle = CreateTileRectangle (l, c, camera);
-					var texture = SelectRoomTexture (l, c);
-					var color = SelectRoomColor (l, c, gameMode);
-					if (!IsEmptyRoom (l, c)) {
-						if (texture != null) {
-							spriteBatch.Draw (texture, rectangle, null, color);
-						}
-						else {
-							DumpTileInfo (l, c);
-						}
-					}
+					RenderTile (l, c, camera, spriteBatch, gameMode, blockMode);
+				}
+			}
+		}
+
+		void RenderTile (int l, int c, Camera camera, SpriteBatch spriteBatch, bool gameMode, bool blockMode)
+		{
+			if (blockMode)
+				RenderTileFromBlocks (l, c, camera, spriteBatch, gameMode, blockMode);
+			else
+				RenderTileFromImages (l, c, camera, spriteBatch, gameMode, blockMode);
+		}
+
+		void RenderTileFromBlocks (int l, int c, Camera camera, SpriteBatch spriteBatch, bool gameMode, bool blockMode)
+		{
+			int blockWidth = TILE_WIDTH / 16;
+			int blockHeight = TILE_HEIGHT / 9;
+			var targetTileType = level.Tiles [c + l * mapWidth];
+
+			for (int c1 = 0; c1 < 16; c1++) {
+				for (int l1 = 0; l1 < 9; l1++) {
+					var newPos = camera.TransformPoint (c * TILE_WIDTH + c1 * blockWidth, l * TILE_HEIGHT + l1 * blockHeight);
+					var rectangle = new Rectangle (newPos.Item1, newPos.Item2, (int)(blockWidth*camera.ScaleX), (int)(blockHeight*camera.ScaleY));
+					var color = SelectRoomColor (l, c, gameMode, blockMode);
+					var texture = targetTileType.Blocks [c1, l1] == 1 ? tileGround : tileSea;
+					spriteBatch.Draw (texture, rectangle, null, color);
+				}
+			}
+		}
+
+		void RenderTileFromImages (int l, int c, Camera camera, SpriteBatch spriteBatch, bool gameMode, bool blockMode)
+		{
+			var rectangle = CreateTileRectangle (l, c, camera);
+			var texture = SelectRoomTexture (l, c);
+			var color = SelectRoomColor (l, c, gameMode, blockMode);
+			if (!IsEmptyRoom (l, c)) {
+				if (texture != null) {
+					spriteBatch.Draw (texture, rectangle, null, color);
+				}
+				else {
+					DumpTileInfo (l, c);
 				}
 			}
 		}
@@ -198,18 +234,42 @@ namespace PosEd
 			return texture;
 		}
 
-		Color SelectRoomColor (int l, int c, bool gameMode)
+		Color SelectRoomColor (int l, int c, bool gameMode, bool blockMode)
 		{
 			var targetTileType = level.Tiles [c + l * mapWidth];
 
+			if (blockMode)
+				return RoomColorForBlockMode (gameMode, targetTileType);
+			else
+				return RoomColorForImageMode (gameMode, targetTileType);
+		}
+
+		Color RoomColorForBlockMode (bool gameMode, TileData targetTileType)
+		{
+			if (!targetTileType.MainPath || (gameMode && !targetTileType.Finish))
+				return Color.LightGray;
+			else
+				if (targetTileType.Start)
+					return Color.LightGreen;
+				else
+					if (targetTileType.Finish)
+						return Color.LightSalmon;
+					else
+						return Color.Gray;
+		}
+
+		Color RoomColorForImageMode (bool gameMode, TileData targetTileType)
+		{
 			if (!targetTileType.MainPath || (gameMode && !targetTileType.Finish))
 				return Color.LightYellow;
-			else if (targetTileType.Start)
-				return Color.LightGreen;
-			else if (targetTileType.Finish)
-				return Color.LightSalmon;
 			else
-				return Color.LightCyan;
+				if (targetTileType.Start)
+					return Color.LightGreen;
+				else
+					if (targetTileType.Finish)
+						return Color.LightSalmon;
+					else
+						return Color.LightCyan;
 		}
 
 		bool IsEmptyRoom (int l, int c)
@@ -218,26 +278,40 @@ namespace PosEd
 			return targetTileType.Empty;
 		}
 
-		public bool Collision (float px, float py)
+		public bool Collision (float px, float py, bool blockMode)
 		{
 			int c = (int)px / TILE_WIDTH;
 			int l = (int)py / TILE_HEIGHT;
 
 			var targetTileType = level.Tiles [c + l * mapWidth];
 
-			return CollisionWithWalls (targetTileType.Walls, (int)px % TILE_WIDTH, (int)py % TILE_HEIGHT);
+			return CollisionWithTile (targetTileType, (int)px % TILE_WIDTH, (int)py % TILE_HEIGHT, blockMode);
 		}
 
-		bool CollisionWithWalls (WallTypes walls, int x, int y)
+		bool CollisionWithTile (TileData tile, int x, int y, bool blockMode)
 		{
-			Console.WriteLine (String.Format("{0} - {1},{2}", walls, x, y));
+			if (blockMode)
+				return PerBlockCollision (tile.Blocks, x, y);
+			else
+				return PerWallCollision (tile.Walls, x, y);
+		}
 
-			if (x == 0 && ((walls & WallTypes.Left) != 0)) return true;
-			if (x == TILE_WIDTH - 1 && ((walls & WallTypes.Right) != 0)) return true;
+		bool PerBlockCollision (byte[,] blocks, int x, int y)
+		{
+			return blocks[x/5, y/5] == 1;
+		}
 
-			if (y == 0 && ((walls & WallTypes.Top) != 0)) return true;
-			if (y == TILE_HEIGHT - 1 && ((walls & WallTypes.Bottom) != 0)) return true;
-
+		bool PerWallCollision (WallTypes walls, int x, int y)
+		{
+			Console.WriteLine (String.Format ("{0} - {1},{2}", walls, x, y));
+			if (x == 0 && ((walls & WallTypes.Left) != 0))
+				return true;
+			if (x == TILE_WIDTH - 1 && ((walls & WallTypes.Right) != 0))
+				return true;
+			if (y == 0 && ((walls & WallTypes.Top) != 0))
+				return true;
+			if (y == TILE_HEIGHT - 1 && ((walls & WallTypes.Bottom) != 0))
+				return true;
 			return false;
 		}
 
