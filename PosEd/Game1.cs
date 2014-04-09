@@ -45,6 +45,7 @@ namespace PosEd
 		BathysphereEntity bathysphereEntity;
 
 		Camera camera;
+		float viewScale = 1.0f;
 
 		Keys[] oldKeyDowns;
 
@@ -62,7 +63,9 @@ namespace PosEd
 		int slowCount = 0;
 		int delta = 100;
 
-		bool game = false;
+		bool gameMode = false;
+
+		bool blockMode = false;
 
 		public Game1 ()
 		{
@@ -103,13 +106,19 @@ namespace PosEd
 
 		void GameMode()
 		{
-			game = !game;
+			gameMode = !gameMode;
 			slow = false;
+			viewScale = 1.0f;
 
-			if (game)
-				camera.SetViewPort (levelEntity.Width/MAP_WIDTH, levelEntity.Height/MAP_HEIGHT);
+			if (gameMode)
+				camera.SetViewPort ((int)(viewScale*levelEntity.Width/MAP_WIDTH), (int)(viewScale*levelEntity.Height/MAP_HEIGHT));
 			else
 				camera.SetViewPort (levelEntity.Width, levelEntity.Height);
+		}
+
+		void BlockMode ()
+		{
+			blockMode = !blockMode;
 		}
 
 		void SetStartXY ()
@@ -147,7 +156,7 @@ namespace PosEd
 		void SetupInitialValues ()
 		{
 			oldKeyDowns = Keyboard.GetState().GetPressedKeys();
-			game = false;
+			gameMode = false;
 			slow = false;
 		}
 
@@ -200,6 +209,10 @@ namespace PosEd
 				GameMode ();
 			}
 
+			if (newKeyReleases.Contains (Keys.B)) {
+				BlockMode ();
+			}
+
 			if (keyStillDowns.Contains (Keys.Left)) {
 				bathysphereEntity.ApplyForce (-2, 0);
 			}
@@ -214,6 +227,16 @@ namespace PosEd
 
 			if (keyStillDowns.Contains (Keys.Down)) {
 				bathysphereEntity.ApplyForce (0, 1);
+			}
+
+			if (newKeyReleases.Contains (Keys.PageUp) && gameMode) {
+				viewScale += 0.25f;
+				camera.SetViewPort ((int)(viewScale * levelEntity.Width / MAP_WIDTH), (int)(viewScale * levelEntity.Height / MAP_HEIGHT));
+			}
+
+			if (newKeyReleases.Contains (Keys.PageDown) && gameMode) {
+				viewScale -= 0.25f;
+				camera.SetViewPort ((int)(viewScale * levelEntity.Width / MAP_WIDTH), (int)(viewScale * levelEntity.Height / MAP_HEIGHT));
 			}
 
 			oldKeyDowns = newKeyDowns;
@@ -266,8 +289,8 @@ namespace PosEd
 
 		void RenderMap ()
 		{
-			levelEntity.Render (camera, spriteBatch, game);
-			bathysphereEntity.Render (camera, spriteBatch);
+			levelEntity.Render (camera, spriteBatch, gameMode, blockMode);
+			bathysphereEntity.Render (camera, spriteBatch, blockMode);
 		}
 			
 		void CollisionBathysphereWorld (BathysphereEntity bathysphereEntity, LevelEntity levelEntity)
@@ -275,7 +298,7 @@ namespace PosEd
 			float px = bathysphereEntity.Posx;
 			float py = bathysphereEntity.Posy;
 
-			if (levelEntity.Collision (px, py)) {
+			if (levelEntity.Collision (px, py, blockMode)) {
 				bathysphereEntity.Rewind ();
 			}
 		}
