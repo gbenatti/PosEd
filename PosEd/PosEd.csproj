@@ -77,7 +77,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
-    <None Include="Content\rooms.txt" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Content\logo.png" />
@@ -98,6 +97,9 @@
     <BundleResource Include="Content\square-lbr.png" />
     <BundleResource Include="Content\square-ltr.png" />
     <BundleResource Include="Content\bathysphere-small.png" />
+    <BundleResource Include="Content\tile-ground.png" />
+    <BundleResource Include="Content\tile-sea.png" />
+    <BundleResource Include="Content\player.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -109,5 +111,11 @@
       <Project>{D28F16B6-D30E-4307-AAF2-BF047C4495D9}</Project>
       <Name>MapGen</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Content\Resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Rooms.txt" />
   </ItemGroup>
 </Project>
