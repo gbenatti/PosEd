@@ -54,6 +54,10 @@ namespace PosEd
 		Texture2D tileGround;
 		Texture2D tileSea;
 
+		Texture2D tileGroundGrid;
+
+		Texture2D tileSeaGrid;
+
 		int mapWidth;
 
 		int mapHeight;
@@ -105,26 +109,34 @@ namespace PosEd
 
 			tileGround = content.Load<Texture2D> ("tile-ground");
 			tileSea = content.Load<Texture2D> ("tile-sea");
+
+			tileGroundGrid = content.Load<Texture2D> ("tile-ground-grid");
+			tileSeaGrid = content.Load<Texture2D> ("tile-sea-grid");
 		}
 
-		public void Render(Camera camera, SpriteBatch spriteBatch, bool gameMode, bool blockMode)
+		public void SetLevel(LevelDescription level)
+		{
+			this.level = level;
+		}
+
+		public void Render(Camera camera, SpriteBatch spriteBatch, Game1.RenderMode renderMode)
 		{
 			for (int l = 0; l < level.Height; l++) {
 				for (int c = 0; c < level.Width; c++) {
-					RenderTile (l, c, camera, spriteBatch, gameMode, blockMode);
+					RenderTile (l, c, camera, spriteBatch, renderMode);
 				}
 			}
 		}
 
-		void RenderTile (int l, int c, Camera camera, SpriteBatch spriteBatch, bool gameMode, bool blockMode)
+		void RenderTile (int l, int c, Camera camera, SpriteBatch spriteBatch, Game1.RenderMode renderMode)
 		{
-			if (blockMode)
-				RenderTileFromBlocks (l, c, camera, spriteBatch, gameMode, blockMode);
+			if (renderMode.ShowBlocks)
+				RenderTileFromBlocks (l, c, camera, spriteBatch, renderMode);
 			else
-				RenderTileFromImages (l, c, camera, spriteBatch, gameMode, blockMode);
+				RenderTileFromImages (l, c, camera, spriteBatch, renderMode);
 		}
 
-		void RenderTileFromBlocks (int l, int c, Camera camera, SpriteBatch spriteBatch, bool gameMode, bool blockMode)
+		void RenderTileFromBlocks (int l, int c, Camera camera, SpriteBatch spriteBatch, Game1.RenderMode renderMode)
 		{
 			int blockWidth = TILE_WIDTH / 16;
 			int blockHeight = TILE_HEIGHT / 9;
@@ -134,18 +146,18 @@ namespace PosEd
 				for (int l1 = 0; l1 < 9; l1++) {
 					var newPos = camera.TransformPoint (c * TILE_WIDTH + c1 * blockWidth, l * TILE_HEIGHT + l1 * blockHeight);
 					var rectangle = new Rectangle (newPos.Item1, newPos.Item2, (int)(blockWidth*camera.ScaleX), (int)(blockHeight*camera.ScaleY));
-					var color = SelectRoomColor (l, c, gameMode, blockMode);
-					var texture = targetTileType.Blocks [c1, l1] == 1 ? tileGround : tileSea;
+					var color = SelectRoomColor (l, c, renderMode.InGame, renderMode.ShowBlocks);
+					var texture = SelectBlockTexture (targetTileType, c1, l1, renderMode.ShowGrid);
 					spriteBatch.Draw (texture, rectangle, null, color);
 				}
 			}
 		}
 
-		void RenderTileFromImages (int l, int c, Camera camera, SpriteBatch spriteBatch, bool gameMode, bool blockMode)
+		void RenderTileFromImages (int l, int c, Camera camera, SpriteBatch spriteBatch, Game1.RenderMode renderMode)
 		{
 			var rectangle = CreateTileRectangle (l, c, camera);
 			var texture = SelectRoomTexture (l, c);
-			var color = SelectRoomColor (l, c, gameMode, blockMode);
+			var color = SelectRoomColor (l, c, renderMode.InGame, renderMode.ShowBlocks);
 			if (!IsEmptyRoom (l, c)) {
 				if (texture != null) {
 					spriteBatch.Draw (texture, rectangle, null, color);
@@ -160,6 +172,11 @@ namespace PosEd
 		{
 			var newPos = camera.TransformPoint (c * TILE_WIDTH, l * TILE_HEIGHT);
 			return new Rectangle (newPos.Item1, newPos.Item2, (int)(TILE_WIDTH*camera.ScaleX), (int)(TILE_HEIGHT*camera.ScaleY));
+		}
+
+		Texture2D SelectBlockTexture (TileData targetTileType, int c, int l, bool showGrid)
+		{
+			return targetTileType.Blocks [c, l] == 1 ? showGrid ? tileGroundGrid : tileGround : showGrid ? tileSeaGrid : tileSea;
 		}
 
 		Texture2D SelectRoomTexture (int l, int c)
@@ -247,7 +264,7 @@ namespace PosEd
 		Color RoomColorForBlockMode (bool gameMode, TileData targetTileType)
 		{
 			if (!targetTileType.MainPath || (gameMode && !targetTileType.Finish))
-				return Color.LightGray;
+				return Color.Gray;
 			else
 				if (targetTileType.Start)
 					return Color.LightGreen;
@@ -255,7 +272,7 @@ namespace PosEd
 					if (targetTileType.Finish)
 						return Color.LightSalmon;
 					else
-						return Color.Gray;
+						return Color.LightGray;
 		}
 
 		Color RoomColorForImageMode (bool gameMode, TileData targetTileType)

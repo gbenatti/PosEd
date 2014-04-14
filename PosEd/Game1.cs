@@ -34,6 +34,24 @@ namespace PosEd
 	/// </summary>
 	public class Game1 : Game
 	{
+		public class RenderMode
+		{
+			public bool InGame {
+				get;
+				set;
+			}
+
+			public bool ShowBlocks {
+				get;
+				set;
+			}
+
+			public bool ShowGrid {
+				get;
+				set;
+			}
+		}
+
 		#region Fields
 
 		GraphicsDeviceManager graphics;
@@ -59,13 +77,15 @@ namespace PosEd
 		const int SCREEN_WIDTH = MAP_WIDTH * 160;
 		const int SCREEN_HEIGHT = MAP_HEIGHT * 90;
 
-		bool slow = false;
-		int slowCount = 0;
+		bool creationMode = false;
+		int creationCount = 0;
 		int delta = 100;
 
 		bool gameMode = false;
 
 		bool blockMode = false;
+
+		bool squareMode = false;
 
 		public Game1 ()
 		{
@@ -95,19 +115,21 @@ namespace PosEd
 			}
 		}
 
-		void SlowMotion ()
+		void CreationMode ()
 		{
-			slow = !slow;
-			if (slow)
-				slowCount = 0;
-			else
-				levelDescription = new LevelDescription(MAP_WIDTH, MAP_HEIGHT, LevelGenerator.Context.LastSnapshot);
+			creationMode = !creationMode;
+			if (creationMode)
+				creationCount = 0;
+			else {
+				levelDescription = new LevelDescription (MAP_WIDTH, MAP_HEIGHT, LevelGenerator.Context.LastSnapshot);
+				levelEntity.SetLevel (levelDescription);
+			}
 		}
 
 		void GameMode()
 		{
 			gameMode = !gameMode;
-			slow = false;
+			creationMode = false;
 			viewScale = 1.0f;
 
 			if (gameMode)
@@ -119,6 +141,11 @@ namespace PosEd
 		void BlockMode ()
 		{
 			blockMode = !blockMode;
+		}
+
+		void ShowSquaresMode ()
+		{
+			squareMode = !squareMode;
 		}
 
 		void SetStartXY ()
@@ -157,7 +184,8 @@ namespace PosEd
 		{
 			oldKeyDowns = Keyboard.GetState().GetPressedKeys();
 			gameMode = false;
-			slow = false;
+			creationMode = false;
+			squareMode = false;
 		}
 
 		/// <summary>
@@ -201,8 +229,8 @@ namespace PosEd
 				SetupInitialValues ();
 			}
 
-			if (newKeyReleases.Contains (Keys.S)) {
-				SlowMotion ();
+			if (newKeyReleases.Contains (Keys.C)) {
+				CreationMode ();
 			}
 
 			if (newKeyReleases.Contains (Keys.G)) {
@@ -211,6 +239,10 @@ namespace PosEd
 
 			if (newKeyReleases.Contains (Keys.B)) {
 				BlockMode ();
+			}
+
+			if (newKeyReleases.Contains (Keys.S)) {
+				ShowSquaresMode ();
 			}
 
 			if (keyStillDowns.Contains (Keys.Left)) {
@@ -244,20 +276,21 @@ namespace PosEd
 
 		void UpdateSlow(GameTime gameTime)
 		{
-			if (!slow)
+			if (!creationMode)
 				return;
 
 			delta -= gameTime.ElapsedGameTime.Milliseconds;
 			if (delta < 0) {
 				delta = 500;
 
-				slowCount += 1;
-				if (slowCount >= LevelGenerator.Context.Snapshots.Count) {
-					slowCount = 0;
+				creationCount += 1;
+				if (creationCount >= LevelGenerator.Context.Snapshots.Count) {
+					creationCount = 0;
 				}
 			}
 
-			levelDescription = new LevelDescription(MAP_WIDTH, MAP_HEIGHT, LevelGenerator.Context.Snapshots[slowCount]);
+			levelDescription = new LevelDescription(MAP_WIDTH, MAP_HEIGHT, LevelGenerator.Context.Snapshots[creationCount]);
+			levelEntity.SetLevel (levelDescription);
 		}
 
 		void UpdateGame(GameTime gameTime)
@@ -286,11 +319,13 @@ namespace PosEd
 				base.Draw (gameTime);
 			}
 		}
-
+			
 		void RenderMap ()
 		{
-			levelEntity.Render (camera, spriteBatch, gameMode, blockMode);
-			bathysphereEntity.Render (camera, spriteBatch, blockMode);
+			var renderMode = new RenderMode { InGame = gameMode, ShowBlocks = blockMode, ShowGrid = squareMode};
+
+			levelEntity.Render (camera, spriteBatch, renderMode);
+			bathysphereEntity.Render (camera, spriteBatch, renderMode);
 		}
 			
 		void CollisionBathysphereWorld (BathysphereEntity bathysphereEntity, LevelEntity levelEntity)

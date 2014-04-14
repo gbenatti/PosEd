@@ -100,6 +100,8 @@
     <BundleResource Include="Content\tile-ground.png" />
     <BundleResource Include="Content\tile-sea.png" />
     <BundleResource Include="Content\player.png" />
+    <BundleResource Include="Content\tile-ground-grid.png" />
+    <BundleResource Include="Content\tile-sea-grid.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

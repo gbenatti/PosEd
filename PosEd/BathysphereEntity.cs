@@ -61,9 +61,9 @@ namespace PosEd
 			submarine = content.Load<Texture2D> ("player");
 		}
 
-		public void Render (Camera camera, SpriteBatch spriteBatch, bool blockMode)
+		public void Render (Camera camera, SpriteBatch spriteBatch, Game1.RenderMode renderMode)
 		{
-			spriteBatch.Draw (blockMode ? submarine : bathyspehere, CreateEntityRectangle (camera), null, Color.White);
+			spriteBatch.Draw (renderMode.ShowBlocks ? submarine : bathyspehere, CreateEntityRectangle (camera), null, Color.White);
 		}
 
 		Rectangle CreateEntityRectangle (Camera camera)
