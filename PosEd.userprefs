@@ -2,9 +2,10 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.Workbench ActiveDocument="PosEd/PoseidonGame.cs">
     <Files>
-      <File FileName="PosEd/PoseidonGame.cs" Line="17" Column="7" />
-      <File FileName="PosEd/LevelEntity.cs" Line="203" Column="21" />
-      <File FileName="MapGen/TileData.cs" Line="3" Column="7" />
+      <File FileName="PosEd/PoseidonGame.cs" Line="57" Column="16" />
+      <File FileName="PosEd/LevelEntity.cs" Line="1" Column="1" />
+      <File FileName="MapGen/TileData.cs" Line="185" Column="36" />
+      <File FileName="PosEd/Content/Rooms.txt" Line="40" Column="17" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

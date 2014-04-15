@@ -20,29 +20,6 @@ em várias combinações possiveis.
 E quando executamos o jogo em "modo de blocos", algumas templates são utilizadas no lugar de cada sala, esses templates são 
 definidos no arquivo Rooms.txt.
 
-Exemplo da seção de salas que são fechadas no topo, retirada do arquivo.
-
->Top
-1111111111111111
-1000000000000001
-0011111111111100
-0111111111111110
-0111111111111110
-0011111111111100
-0000000000000000
-0000000000000000
-0000000000000000
--
-1111111111111111
-0110011111100000
-0000001111000000
-0000000000000000
-0000000000000000
-0000000000000000
-0000000000000000
-0000000000000000
-0000000000000000
-
 Cada sala é composta de 16 colunas com 9 linhas, contendo um caracter.
 No momento são suportados os caracteres 0 e 1, onde:
  0 indica um espaço vazio.

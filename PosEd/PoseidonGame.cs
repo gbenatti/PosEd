@@ -63,7 +63,7 @@ namespace PosEd
 		BathysphereEntity bathysphereEntity;
 
 		Camera camera;
-		float viewScale = 1.0f;
+		float viewScale = 1.25f;
 
 		Keys[] oldKeyDowns;
 
