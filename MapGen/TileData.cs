@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
+using System.IO;
 
 namespace MapGen
 {
@@ -19,12 +20,12 @@ namespace MapGen
 			loaded = false;
 		}
 
-		public void Load(string filename)
+		public void Load(Stream stream)
 		{
 			if (loaded)
 				return;
 
-			var data = LoadFromFile (filename);
+			var data = LoadFromStream (stream);
 			ParseRoomDescriptorsFile (data);
 		}
 
@@ -35,10 +36,10 @@ namespace MapGen
 			return RoomDescriptors [walls] [index];
 		}
 
-		string LoadFromFile (string filename)
+		string LoadFromStream (Stream stream)
 		{
 			loaded = true;
-			return new System.IO.StreamReader(TitleContainer.OpenStream("Content/Rooms.txt")).ReadToEnd();	
+			return new System.IO.StreamReader(stream).ReadToEnd();	
 		}
 
 		void ParseRoomDescriptorsFile (string data)
@@ -160,7 +161,7 @@ namespace MapGen
 
 		public TileData ()
 		{
-			tileDescriptors.Load ("Rooms.txt");
+			tileDescriptors.Load (TitleContainer.OpenStream("Content/Rooms.txt"));
 
 			Walls = WallTypes.None;
 			PathIndex = -1;
@@ -173,7 +174,7 @@ namespace MapGen
 
 		public static TileData Create (WallTypes walls, bool mainPath, bool start = false, bool finish = false)
 		{
-			tileDescriptors.Load ("Rooms.txt");
+			tileDescriptors.Load (TitleContainer.OpenStream("Content/Rooms.txt"));
 
 			return new TileData {
 				Walls = walls,
