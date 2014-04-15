@@ -68,12 +68,12 @@
     <Reference Include="System.Reactive.Interfaces, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Game1.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LevelEntity.cs" />
     <Compile Include="BathysphereEntity.cs" />
     <Compile Include="Camera.cs" />
+    <Compile Include="PoseidonGame.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />

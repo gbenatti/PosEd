@@ -119,7 +119,7 @@ namespace PosEd
 			this.level = level;
 		}
 
-		public void Render(Camera camera, SpriteBatch spriteBatch, Game1.RenderMode renderMode)
+		public void Render(Camera camera, SpriteBatch spriteBatch, PoseidonGame.RenderMode renderMode)
 		{
 			for (int l = 0; l < level.Height; l++) {
 				for (int c = 0; c < level.Width; c++) {
@@ -128,7 +128,7 @@ namespace PosEd
 			}
 		}
 
-		void RenderTile (int l, int c, Camera camera, SpriteBatch spriteBatch, Game1.RenderMode renderMode)
+		void RenderTile (int l, int c, Camera camera, SpriteBatch spriteBatch, PoseidonGame.RenderMode renderMode)
 		{
 			if (renderMode.ShowBlocks)
 				RenderTileFromBlocks (l, c, camera, spriteBatch, renderMode);
@@ -136,7 +136,7 @@ namespace PosEd
 				RenderTileFromImages (l, c, camera, spriteBatch, renderMode);
 		}
 
-		void RenderTileFromBlocks (int l, int c, Camera camera, SpriteBatch spriteBatch, Game1.RenderMode renderMode)
+		void RenderTileFromBlocks (int l, int c, Camera camera, SpriteBatch spriteBatch, PoseidonGame.RenderMode renderMode)
 		{
 			int blockWidth = TILE_WIDTH / 16;
 			int blockHeight = TILE_HEIGHT / 9;
@@ -153,7 +153,7 @@ namespace PosEd
 			}
 		}
 
-		void RenderTileFromImages (int l, int c, Camera camera, SpriteBatch spriteBatch, Game1.RenderMode renderMode)
+		void RenderTileFromImages (int l, int c, Camera camera, SpriteBatch spriteBatch, PoseidonGame.RenderMode renderMode)
 		{
 			var rectangle = CreateTileRectangle (l, c, camera);
 			var texture = SelectRoomTexture (l, c);

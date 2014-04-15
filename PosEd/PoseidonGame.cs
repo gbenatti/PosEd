@@ -32,7 +32,7 @@ namespace PosEd
 	/// <summary>
 	/// Default Project Template
 	/// </summary>
-	public class Game1 : Game
+	public class PoseidonGame : Game
 	{
 		public class RenderMode
 		{
@@ -87,7 +87,7 @@ namespace PosEd
 
 		bool squareMode = false;
 
-		public Game1 ()
+		public PoseidonGame ()
 		{
 
 			graphics = new GraphicsDeviceManager (this);
@@ -261,12 +261,12 @@ namespace PosEd
 				bathysphereEntity.ApplyForce (0, 1);
 			}
 
-			if (newKeyReleases.Contains (Keys.PageUp) && gameMode) {
+			if (newKeyReleases.Contains (Keys.OemOpenBrackets) && gameMode) {
 				viewScale += 0.25f;
 				camera.SetViewPort ((int)(viewScale * levelEntity.Width / MAP_WIDTH), (int)(viewScale * levelEntity.Height / MAP_HEIGHT));
 			}
 
-			if (newKeyReleases.Contains (Keys.PageDown) && gameMode) {
+			if (newKeyReleases.Contains (Keys.OemCloseBrackets) && gameMode) {
 				viewScale -= 0.25f;
 				camera.SetViewPort ((int)(viewScale * levelEntity.Width / MAP_WIDTH), (int)(viewScale * levelEntity.Height / MAP_HEIGHT));
 			}
